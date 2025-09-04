@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Search, Clock, Mountain, Route } from 'lucide-react';
+import { Search, Clock, Mountain, Route, X, ChevronLeft, ChevronRight, MapPin, TrendingUp, ChevronUp, ChevronDown } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import MenuIcon from '@mui/icons-material/Menu';
