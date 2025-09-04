@@ -7,7 +7,7 @@ import FilterListIcon from '@mui/icons-material/FilterList';
 import CloseIcon from '@mui/icons-material/Close';
 
 // Importa o componente do modal da pasta components/ui
-import TrailModal from '../components/TrailModal.jsx';
+import TrailModal from '../modal/TrailModal.js';
 
 // Dados de exemplo para as trilhas
 const mockTrails = [
@@ -254,13 +254,15 @@ export default function LandingPage() {
         </div>
       </main>
       
-      {/* Modal */}
-      <TrailModal 
-        isOpen={isModalOpen}
-        onClose={handleCloseModal}
-        trail={selectedTrail}
-        allTrails={mockTrails}
-      />
+      {/* Modal - A ÚNICA ALTERAÇÃO */}
+      {isModalOpen && selectedTrail && (
+        <TrailModal 
+          isOpen={isModalOpen}
+          onClose={handleCloseModal}
+          trail={selectedTrail}
+          allTrails={mockTrails}
+        />
+      )}
     </div>
   );
 }

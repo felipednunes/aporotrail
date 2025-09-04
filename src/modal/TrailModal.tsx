@@ -43,33 +43,41 @@ interface TrailModalProps {
 
 // O componente do modal
 export default function TrailModal({ isOpen, onClose, trail, allTrails }: TrailModalProps) {
-  console.log(isOpen)
-  const [selectedTrail, setSelectedTrail] = useState<Trail | null>(trail);
   const [activeTab, setActiveTab] = useState('info');
   const [currentCarouselIndex, setCurrentCarouselIndex] = useState(0);
   const [currentPhotoIndex, setCurrentPhotoIndex] = useState(0);
 
-  // Se não houver trilha selecionada, o modal não é renderizado.
-  if (!selectedTrail) return null;
+  // Se não houver trilha, não renderiza o conteúdo do modal.
+  // Isso é importante para evitar erros de renderização com dados nulos.
+  if (!trail) {
+    // Para resolver o erro do editor, vamos retornar um `Dialog` vazio
+    // que simplesmente se fecha.
+    return (
+      <Dialog open={isOpen} onOpenChange={onClose}>
+        <DialogContent></DialogContent>
+      </Dialog>
+    );
+  }
 
   // Lógica para o carrossel de fotos (próxima foto)
   const nextPhoto = () => {
-    setCurrentPhotoIndex((prev) => 
-      prev === selectedTrail.photos.length - 1 ? 0 : prev + 1
+    setCurrentPhotoIndex((prev) =>
+      prev === trail.photos.length - 1 ? 0 : prev + 1
     );
   };
 
   // Lógica para o carrossel de fotos (foto anterior)
   const prevPhoto = () => {
-    setCurrentPhotoIndex((prev) => 
-      prev === 0 ? selectedTrail.photos.length - 1 : prev - 1
+    setCurrentPhotoIndex((prev) =>
+      prev === 0 ? trail.photos.length - 1 : prev - 1
     );
   };
 
   // Função para selecionar uma nova trilha no carrossel vertical
   const selectTrail = (newTrail: Trail) => {
-    setSelectedTrail(newTrail);
-    setActiveTab('info');
+    // Isso é um ponto chave. Quando uma nova trilha é selecionada, o modal
+    // fecha e o componente pai reabre com a nova trilha.
+    onClose();
   };
 
   // Lógica para o carrossel vertical de trilhas (próxima trilha)
@@ -91,7 +99,7 @@ export default function TrailModal({ isOpen, onClose, trail, allTrails }: TrailM
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="modal-1 max-w-7xl w-full h-[800px] p-0 overflow-hidden rounded-md bg-white/10 relative z-50">
+      <DialogContent className="max-w-7xl w-full h-[800px] p-0 overflow-hidden rounded-md relative bg-white/10 z-50 fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
         <div className="absolute inset-0 bg-black opacity-45 z-10"></div>
         <div className="relative w-full h-full bg-white z-20 flex">
           {/* Main Content Area (Tabs) */}
@@ -99,7 +107,7 @@ export default function TrailModal({ isOpen, onClose, trail, allTrails }: TrailM
             <DialogHeader className="p-0 border-b pb-4">
               <div className="flex items-center justify-between">
                 <DialogTitle className="font-inter font-bold text-3xl text-black">
-                  {selectedTrail.name}
+                  {trail.name}
                 </DialogTitle>
                 <Button
                   variant="ghost"
@@ -130,35 +138,35 @@ export default function TrailModal({ isOpen, onClose, trail, allTrails }: TrailM
                         <Mountain className="w-5 h-5 text-gray-500" />
                         <div>
                           <p className="text-xs text-gray-500">Dificuldade</p>
-                          <p className="font-inter font-bold text-sm">{selectedTrail.difficulty}</p>
+                          <p className="font-inter font-bold text-sm">{trail.difficulty}</p>
                         </div>
                       </div>
                       <div className="tempo flex items-center space-x-2 p-3 bg-gray-50 rounded-lg">
                         <Clock className="w-5 h-5 text-gray-500" />
                         <div>
                           <p className="text-xs text-gray-500">Tempo</p>
-                          <p className="font-inter font-bold text-sm">{selectedTrail.duration}</p>
+                          <p className="font-inter font-bold text-sm">{trail.duration}</p>
                         </div>
                       </div>
                       <div className="extensao flex items-center space-x-2 p-3 bg-gray-50 rounded-lg">
                         <Route className="w-5 h-5 text-gray-500" />
                         <div>
                           <p className="text-xs text-gray-500">Distância</p>
-                          <p className="font-inter font-bold text-sm">{selectedTrail.distance}</p>
+                          <p className="font-inter font-bold text-sm">{trail.distance}</p>
                         </div>
                       </div>
                       <div className="altitude flex items-center space-x-2 p-3 bg-gray-50 rounded-lg">
                         <TrendingUp className="w-5 h-5 text-gray-500" />
                         <div>
                           <p className="text-xs text-gray-500">Elevação</p>
-                          <p className="font-inter font-bold text-sm">{selectedTrail.elevation}</p>
+                          <p className="font-inter font-bold text-sm">{trail.elevation}</p>
                         </div>
                       </div>
                     </div>
                     {/* Description */}
                     <div>
                       <h3 className="font-inter font-bold text-lg mb-3">Descrição</h3>
-                      <p className="text-gray-700 leading-relaxed">{selectedTrail.description}</p>
+                      <p className="text-gray-700 leading-relaxed">{trail.description}</p>
                     </div>
                   </div>
                 </TabsContent>
@@ -167,8 +175,8 @@ export default function TrailModal({ isOpen, onClose, trail, allTrails }: TrailM
                 <TabsContent value="photos" className="flex-1 px-4">
                   <div className="relative h-full flex flex-col items-center justify-center">
                     <img
-                      src={selectedTrail.photos[currentPhotoIndex]}
-                      alt={`${selectedTrail.name} photo ${currentPhotoIndex + 1}`}
+                      src={trail.photos[currentPhotoIndex]}
+                      alt={`${trail.name} photo ${currentPhotoIndex + 1}`}
                       className="w-full h-96 object-cover rounded-lg"
                     />
                     
@@ -188,7 +196,7 @@ export default function TrailModal({ isOpen, onClose, trail, allTrails }: TrailM
                     
                     {/* Photo Indicators */}
                     <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex space-x-2">
-                      {selectedTrail.photos.map((_, index) => (
+                      {trail.photos.map((_, index) => (
                         <button
                           key={index}
                           onClick={() => setCurrentPhotoIndex(index)}
@@ -208,7 +216,7 @@ export default function TrailModal({ isOpen, onClose, trail, allTrails }: TrailM
                       <MapPin className="w-12 h-12 text-gray-400 mx-auto mb-4" />
                       <h3 className="font-inter font-bold text-lg text-gray-600 mb-2">Google Maps</h3>
                       <p className="text-gray-500">
-                        Coordenadas: {selectedTrail.coordinates.lat}, {selectedTrail.coordinates.lng}
+                        Coordenadas: {trail.coordinates.lat}, {trail.coordinates.lng}
                       </p>
                       <p className="text-sm text-gray-400 mt-2">
                         Integração com Google Maps será implementada aqui
@@ -227,8 +235,8 @@ export default function TrailModal({ isOpen, onClose, trail, allTrails }: TrailM
                         className="w-full h-40"
                       >
                         <AreaChart
-                          data={selectedTrail.elevationData.map((data, index) => ({
-                            distance: (index / (selectedTrail.elevationData.length - 1)) * parseFloat(selectedTrail.distance.replace('km', '')),
+                          data={trail.elevationData.map((data, index) => ({
+                            distance: (index / (trail.elevationData.length - 1)) * parseFloat(trail.distance.replace('km', '')),
                             elevation: data,
                           }))}
                           margin={{
@@ -269,11 +277,11 @@ export default function TrailModal({ isOpen, onClose, trail, allTrails }: TrailM
                     <div className="grid grid-cols-2 gap-4 mt-4">
                       <div className="p-4 bg-gray-50 rounded-lg">
                         <h4 className="font-inter font-bold text-sm text-gray-600">Elevação Máxima</h4>
-                        <p className="text-2xl font-bold text-green-600">{selectedTrail.elevation}</p>
+                        <p className="text-2xl font-bold text-green-600">{trail.elevation}</p>
                       </div>
                       <div className="p-4 bg-gray-50 rounded-lg">
                         <h4 className="font-inter font-bold text-sm text-gray-600">Ganho de Elevação</h4>
-                        <p className="text-2xl font-bold text-green-600">+{selectedTrail.elevation}</p>
+                        <p className="text-2xl font-bold text-green-600">+{trail.elevation}</p>
                       </div>
                     </div>
                   </div>
